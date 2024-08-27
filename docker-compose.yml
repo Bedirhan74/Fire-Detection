@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  extraction_api:
+    build:
+      context: ./extraction
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./extraction:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - RABBITMQ_HOST=rabbitmq
+    env_file:
+      - .env
+
+  prediction_api:
+    build:
+      context: ./prediction
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./prediction:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - RABBITMQ_HOST=rabbitmq
+    env_file:
+      - .env
+
+  telegram_service:
+    build:
+      context: ./telegram_service
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./telegram_service:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+
+  fire_photos:
+    build:
+      context: ./fire-photos
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./fire-photos:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+
+  frontend:
+    image: node:14
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "8080:8080"
+    command: bash -c "npm install && npm run serve"
+    env_file:
+      - .env
+
+
+volumes:
+  mongo-data:
